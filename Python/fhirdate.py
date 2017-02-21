@@ -15,7 +15,7 @@ class FHIRDate(object):
     - `date`: datetime object representing the receiver's date-time
     """
 
-    def __init__(self, jsonval=None, cast=False):
+    def __init__(self, jsonval=None, to_str=False):
         self.date = None
         if isinstance(jsonval, str) or (sys.version_info[0] < 3 and isinstance(jsonval, basestring)):
             try:
@@ -28,16 +28,9 @@ class FHIRDate(object):
             self.date = jsonval
         elif isinstance(jsonval, int):
             self.date = datetime.datetime.utcfromtimestamp(jsonval).replace(tzinfo=None)
-        if cast:
-            self.origval = self.date.isoformat() \
+        if to_str:
+            self.date = self.date.isoformat() \
                 if isinstance(self.date, (datetime.date, datetime.datetime)) else self.date
-        else:
-            self.origval = jsonval
-
-    def __setattr__(self, prop, value):
-        if 'date' == prop:
-            self.origval = None
-        object.__setattr__(self, prop, value)
 
     @property
     def isostring(self):
@@ -67,7 +60,4 @@ class FHIRDate(object):
         return cls.with_json(jsonobj, cast)
 
     def as_json(self):
-        if self.origval is not None:
-            return self.origval
-        return self.isostring
-
+        return self.date

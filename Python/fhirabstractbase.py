@@ -105,7 +105,7 @@ class FHIRAbstractBase(object):
             if hasattr(typ, 'with_json_and_owner'):
                 setattr(self, name, typ.with_json_and_owner(jsondict[jsname], self, cast))
             else:
-                setattr(self, name, self._cast(jsondict[jsname], typ) if cast else jsondict[jsname])
+                setattr(self, name, self._cast(jsondict[jsname], typ, is_list) if cast else jsondict[jsname])
                 # TODO: look at `_name` if this is a primitive
             found.add(jsname)
             found.add('_'+jsname)
@@ -155,21 +155,29 @@ class FHIRAbstractBase(object):
                     .format(nonop, self))
         return js
 
-    def _cast(self, value, typ):
-        if type(value) == typ:
-            return value
-        if typ == bool:
-            if isinstance(value, str):
-                if value.lower() in ['0', 'no', 'zero', 'false', 'off', 'disable']:
-                    return False
-                elif value.lower() in ['1', 'yes', 'one', 'true', 'on', 'enable']:
-                    return True
-                else:
-                    return None
-        try:
-            return typ(value)
-        except TypeError:
-            return None
+    def _cast(self, value, typ, is_list=False):
+        if is_list:
+            if not isinstance(value, list):
+                return None
+            result = []
+            for item in value:
+                result.append(self._cast(item, typ))
+            return result
+        else:
+            if type(value) == typ:
+                return value
+            if typ == bool:
+                if isinstance(value, str):
+                    if value.lower() in ['0', 'no', 'zero', 'false', 'off', 'disable']:
+                        return False
+                    elif value.lower() in ['1', 'yes', 'one', 'true', 'on', 'enable']:
+                        return True
+                    else:
+                        return None
+            try:
+                return typ(value)
+            except (TypeError, ValueError):
+                return None
 
     # MARK: Handling References
 
@@ -207,4 +215,3 @@ class FHIRAbstractBase(object):
             self._resolved[refid] = resolved
         else:
             self._resolved = {refid: resolved}
-
