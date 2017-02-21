@@ -156,6 +156,8 @@ class FHIRAbstractBase(object):
         return js
 
     def _cast(self, value, typ, is_list=False):
+        if value is None:
+            return None
         if is_list:
             if not isinstance(value, list):
                 return None
