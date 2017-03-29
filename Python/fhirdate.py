@@ -11,24 +11,27 @@ import datetime
 
 class FHIRDate(object):
     """ Facilitate working with dates.
-    
+
     - `date`: datetime object representing the receiver's date-time
     """
-    
-    def __init__(self, jsonval=None):
+
+    def __init__(self, jsonval=None, to_str=False):
         self.date = None
-        if jsonval is not None:
-            if 'T' in jsonval:
-                self.date = isodate.parse_datetime(jsonval)
-            else:
-                self.date = isodate.parse_date(jsonval)
-        self.origval = jsonval
-    
-    def __setattr__(self, prop, value):
-        if 'date' == prop:
-            self.origval = None
-        object.__setattr__(self, prop, value)
-    
+        if isinstance(jsonval, str) or (sys.version_info[0] < 3 and isinstance(jsonval, basestring)):
+            try:
+                if 'T' in jsonval:
+                    self.date = isodate.parse_datetime(jsonval)
+                else:
+                    self.date = isodate.parse_date(jsonval)
+            except ValueError: pass
+        elif isinstance(jsonval, (datetime.date, datetime.datetime)):
+            self.date = jsonval
+        elif isinstance(jsonval, int):
+            self.date = datetime.datetime.utcfromtimestamp(jsonval).replace(tzinfo=None)
+        if to_str:
+            self.date = self.date.isoformat() \
+                if isinstance(self.date, (datetime.date, datetime.datetime)) else self.date
+
     @property
     def isostring(self):
         if self.date is None:
@@ -36,31 +39,25 @@ class FHIRDate(object):
         if isinstance(self.date, datetime.datetime):
             return isodate.datetime_isoformat(self.date)
         return isodate.date_isoformat(self.date)
-    
+
     @classmethod
-    def with_json(cls, jsonobj):
+    def with_json(cls, jsonobj, cast=False):
         """ Initialize a date from an ISO date string.
         """
-        isstr = isinstance(jsonobj, str)
-        if not isstr and sys.version_info[0] < 3:       # Python 2.x has 'str' and 'unicode'
-            isstr = isinstance(jsonobj, basestring)
-        if isstr:
-            return cls(jsonobj)
-        
-        arr = []
-        for jsonval in jsonobj:
-            arr.append(cls(jsonval))
-        return arr
-    
+        if isinstance(jsonobj, list):
+            arr = []
+            for jsonval in jsonobj:
+                arr.append(cls(jsonval, cast))
+            return arr
+        else:
+            return cls(jsonobj, cast)
+
     @classmethod
-    def with_json_and_owner(cls, jsonobj, owner):
+    def with_json_and_owner(cls, jsonobj, owner, cast=False):
         """ Added for compatibility reasons to FHIRElement; "owner" is
         discarded.
         """
-        return cls.with_json(jsonobj)
-    
+        return cls.with_json(jsonobj, cast)
+
     def as_json(self):
-        if self.origval is not None:
-            return self.origval
-        return self.isostring
-    
+        return self.date
