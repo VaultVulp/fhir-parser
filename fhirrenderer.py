@@ -19,7 +19,7 @@ class FHIRRenderer(object):
         self.spec = spec
         self.settings = settings
     
-    def render(self, output):
+    def render(self):
         """ The main rendering start point, for subclasses to override.
         """
         raise Exception("Cannot use abstract superclass' `render` method")
@@ -50,23 +50,26 @@ class FHIRRenderer(object):
 class FHIRStructureDefinitionRenderer(FHIRRenderer):
     """ Write classes for a profile/structure-definition.
     """    
-    def copy_files(self, output):
+    def copy_files(self):
         """ Copy base resources to the target location, according to settings.
         """
-        resource_target_dir = os.path.dirname(self.settings.tpl_resource_target_ptrn.format(output, ''))
-        if os.path.isdir(resource_target_dir):
-            shutil.rmtree(resource_target_dir)
-
-        if not os.path.isdir(resource_target_dir):
-            os.mkdir(resource_target_dir)
-
         for filepath, module, contains in self.settings.manual_profiles:
             if os.path.exists(filepath):
+                resource_target_dir = os.path.dirname(self.settings.tpl_resource_target_ptrn)
+                if not os.path.exists(resource_target_dir):
+                    os.makedirs(resource_target_dir)
                 tgt = os.path.join(resource_target_dir, os.path.basename(filepath))
                 logger.info("Copying manual profiles in {} to {}".format(os.path.basename(filepath), tgt))
                 shutil.copyfile(filepath, tgt)
+
+        if self.settings.resource_copyfiles is not None:
+            for _file in self.settings.resource_copyfiles:
+                if os.path.exists(_file):
+                    target = os.path.join(os.path.dirname(self.settings.tpl_resource_target_ptrn), os.path.basename(_file))
+                    logger.info('Copying unittest file {} to {}'.format(os.path.basename(_file), target))
+                    shutil.copyfile(_file, target)
     
-    def render(self, output):
+    def render(self):
         for profile in self.spec.writable_profiles():
             classes = sorted(profile.writable_classes(), key=lambda x: x.name)
             if 0 == len(classes):
@@ -84,7 +87,7 @@ class FHIRStructureDefinitionRenderer(FHIRRenderer):
             
             ptrn = profile.targetname.lower() if self.settings.resource_modules_lowercase else profile.targetname
             source_path = self.settings.tpl_resource_source
-            target_path = self.settings.tpl_resource_target_ptrn.format(output, ptrn)
+            target_path = self.settings.tpl_resource_target_ptrn.format(ptrn)
             
             self.do_render(data, source_path, target_path)
 
@@ -92,7 +95,7 @@ class FHIRStructureDefinitionRenderer(FHIRRenderer):
 class FHIRFactoryRenderer(FHIRRenderer):
     """ Write factories for FHIR classes.
     """
-    def render(self, output):
+    def render(self):
         classes = []
         for profile in self.spec.writable_profiles():
             classes.extend(profile.writable_classes())
@@ -101,13 +104,13 @@ class FHIRFactoryRenderer(FHIRRenderer):
             'info': self.spec.info,
             'classes': sorted(classes, key=lambda x: x.name),
         }
-        self.do_render(data, self.settings.tpl_factory_source, self.settings.tpl_factory_target.format(output))
+        self.do_render(data, self.settings.tpl_factory_source, self.settings.tpl_factory_target)
 
 
 class FHIRUnitTestRenderer(FHIRRenderer):
     """ Write unit tests.
     """
-    def render(self, output):
+    def render(self):
         if self.spec.unit_tests is None:
             return
         
@@ -122,7 +125,7 @@ class FHIRUnitTestRenderer(FHIRRenderer):
             file_pattern = coll.klass.name
             if self.settings.resource_modules_lowercase:
                 file_pattern = file_pattern.lower()
-            file_path = self.settings.tpl_unittest_target_ptrn.format(output, file_pattern)
+            file_path = self.settings.tpl_unittest_target_ptrn.format(file_pattern)
             
             self.do_render(data, self.settings.tpl_unittest_source, file_path)
         
@@ -130,7 +133,7 @@ class FHIRUnitTestRenderer(FHIRRenderer):
         if self.settings.unittest_copyfiles is not None:
             for utfile in self.settings.unittest_copyfiles:
                 if os.path.exists(utfile):
-                    target = os.path.join(os.path.dirname(self.settings.tpl_unittest_target_ptrn.format(output, '')), os.path.basename(utfile))
+                    target = os.path.join(os.path.dirname(self.settings.tpl_unittest_target_ptrn), os.path.basename(utfile))
                     logger.info('Copying unittest file {} to {}'.format(os.path.basename(utfile), target))
                     shutil.copyfile(utfile, target)
 
@@ -148,11 +151,11 @@ def do_wordwrap(environment, s, width=79, break_long_words=True, wrapstring=None
     split words apart if they are longer than `width`.
     """
     if not s:
-        return s
+    	return s
     
     if not wrapstring:
         wrapstring = environment.newline_sequence
-
+    
     accumulator = []
     # Workaround: pre-split the string
     for component in re.split(r"\r?\n", s):

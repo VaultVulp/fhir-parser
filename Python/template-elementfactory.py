@@ -17,13 +17,14 @@ class FHIRElementFactory(object):
 
         :param str resource_name: The name/type of the resource to instantiate
         :param dict jsondict: The JSON dictionary to use for data
-        :returns: A resource of the respective type or None
+        :returns: A resource of the respective type or `Element`
         """
 
         klass = cls.get_class(resource_name)
         if klass:
-            return klass(jsondict, cast)
-        return None
+            return klass(jsondict, cast=cast)
+        from . import element
+        return element.Element(jsondict, cast=cast)
 
     @classmethod
     def get_class(cls, resource_name):

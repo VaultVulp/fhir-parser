@@ -4,12 +4,8 @@ env
 
 # ignore downloads
 /downloads
+/fhirmodels
 
 # ignore IDE files
 *.sublime-*
 
-# ignore IDEA IDE files
-.idea
-
-# ignore downloads
-/models
