@@ -61,7 +61,12 @@ class FHIRAbstractBase(object):
 
         if jsondict is not None:
             if strict:
-                self.update_with_json(jsondict, cast=cast)
+                try:
+                    self.update_with_json(jsondict, cast=cast)
+                except FHIRValidationError as e:
+                    for err in e.errors:
+                        logging.warning(err)
+                    raise
             else:
                 try:
                     self.update_with_json(jsondict, cast=cast)
