@@ -321,7 +321,10 @@ class FHIRAbstractBase(object):
             if isinstance(value, (typ, dict)):
                 return value
             else:
-                return typ(value)
+                try:
+                    return typ(value)
+                except:
+                    return None
 
     # MARK: Handling References
 

@@ -45,7 +45,6 @@ manual_profiles = [                                     # all these profiles sho
     ('Python/fhirboolean.py', 'fhirboolean', ['FHIRBoolean'])
 ]
 resource_copyfiles = ['Python/__init__.py']
-
 # factory methods
 tpl_factory_source = 'Python/template-elementfactory.py'
 
@@ -57,7 +56,12 @@ tpl_searchparams_target = '../models/fhirsearchelement.py'
 
 # unit tests
 tpl_unittest_source = 'Python/template-unittest.py'
-unittest_copyfiles = ['Python/__init__.py']
+unittest_copyfiles = [
+    'Python/tests/__init__.py',
+    'Python/tests/test_fhir_abstract_base.py',
+    'Python/tests/test_fhir_date.py',
+    'Python/tests/test_fhir_reference.py',
+]
 unittest_format_path_prepare = '{}'             # used to format `path` before appending another path element - one placeholder for `path`
 unittest_format_path_key = '{}.{}'              # used to create property paths by appending `key` to the existing `path` - two placeholders
 unittest_format_path_index = '{}[{}]'           # used for array properties - two placeholders, `path` and the array index
