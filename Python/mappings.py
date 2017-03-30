@@ -3,21 +3,21 @@
 # Which class names to map to resources and elements
 classmap = {
     'Any': 'Resource',
-    
-    'boolean': 'bool',
+
+    'boolean': 'FHIRBoolean',
     'integer': 'int',
     'positiveInt': 'int',
     'unsignedInt': 'int',
     'date': 'FHIRDate',
     'dateTime': 'FHIRDate',
     'instant': 'FHIRDate',
-    'time': 'FHIRDate',
+    'time': 'str',
     'decimal': 'float',
-    
+
     'string': 'str',
     'markdown': 'str',
     'id': 'str',
-    'code': 'str',      # for now we're not generating enums for these
+    'code': 'str',  # for now we're not generating enums for these
     'uri': 'str',
     'oid': 'str',
     'uuid': 'str',
@@ -27,7 +27,8 @@ classmap = {
 
 # Classes to be replaced with different ones at resource rendering time
 replacemap = {
-    'Reference': 'FHIRReference',     # `FHIRReference` adds dereferencing capabilities
+    # `FHIRReference` adds dereferencing capabilities
+    'Reference': 'FHIRReference',
 }
 
 # Some properties (in Conformance, Profile and Questionnaire currently) can be
@@ -45,7 +46,7 @@ starexpandtypes = {
     'boolean',
     'code',
     'base64Binary',
-    
+
     'Coding',
     'CodeableConcept',
     'Attachment',
@@ -71,8 +72,10 @@ jsonmap = {
     'int': 'int',
     'bool': 'bool',
     'float': 'float',
-    
+
     'FHIRDate': 'str',
+
+    'FHIRBoolean': 'str',
 }
 jsonmap_default = 'dict'
 

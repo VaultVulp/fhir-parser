@@ -4,7 +4,12 @@ env
 
 # ignore downloads
 /downloads
+
+# ignore generated
 /fhirmodels
+
+# ignore settings
+/settings.py
 
 # ignore IDE files
 *.sublime-*
