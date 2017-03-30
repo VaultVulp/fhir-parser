@@ -23,7 +23,6 @@ class FHIRElementFactory(object):
         klass = cls.get_class(resource_name)
         if klass:
             return klass(jsondict, cast=cast)
-        from . import element
         return element.Element(jsondict, cast=cast)
 
     @classmethod
