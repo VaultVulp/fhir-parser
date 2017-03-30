@@ -66,8 +66,9 @@ class FHIRDate(object):
 
     @classmethod
     def with_json_and_owner(cls, jsonobj, owner, cast=False):
-        """ Added for compatibility reasons to FHIRElement; "owner" is
-        discarded.
+        """ Added for compatibility reasons to FHIRElement.
+
+        "owner" and "cast" are discarded.
         """
         return cls.with_json(jsonobj)
 

@@ -8,7 +8,7 @@ import sys
 
 
 class FHIRBoolean(object):
-    """ Subclassing FHIR's boolean to add value casting capabilities.
+    """ Adds value casting capabilities.
     """
 
     def __init__(self, jsonval=None):
@@ -25,9 +25,8 @@ class FHIRBoolean(object):
                         "Expecting bool or string when initializing {}, but got {}"
                         .format(type(self), type(jsonval))
                     )
-                l_val = jsonval.lower()
-                if l_val in ('false', 'true'):
-                    self.value = l_val == 'true'
+                if jsonval in ('false', 'true'):
+                    self.value = jsonval == 'true'
                 else:
                     logging.warning(
                         'Failed to initialize FHIRBoolean from "{}'
@@ -36,29 +35,20 @@ class FHIRBoolean(object):
 
     @classmethod
     def with_json(cls, jsonobj):
-        """ Initialize a FHIRBoolean object from a string.
+        """ Initialize a FHIRBoolean object.
         """
         if isinstance(jsonobj, cls):
             return jsonobj
-        elif isinstance(jsonobj, bool):
-            return cls(jsonobj)
         elif isinstance(jsonobj, list):
             return [cls(jsonval) for jsonval in jsonobj]
         else:
-            isstr = isinstance(jsonobj, str)
-            if not isstr and sys.version_info[0] < 3:  # Python 2.x has 'str' and 'unicode'
-                isstr = isinstance(jsonobj, basestring)
-            if isstr:
-                return cls(jsonobj)
-
-        raise TypeError(
-            "`cls.with_json()` only takes string or list of strings, but you provided {}"
-            .format(type(jsonobj)))
+            return cls(jsonobj)
 
     @classmethod
     def with_json_and_owner(cls, jsonobj, owner, cast=False):
-        """ Added for compatibility reasons to FHIRElement; "owner" is
-        discarded.
+        """ Added for compatibility reasons to FHIRElement.
+         
+        "owner" and "cast" are discarded.
         """
         return cls.with_json(jsonobj)
 

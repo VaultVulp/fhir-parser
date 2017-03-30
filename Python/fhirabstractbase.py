@@ -321,15 +321,7 @@ class FHIRAbstractBase(object):
             if isinstance(value, (typ, dict)):
                 return value
             else:
-                try:
-                    return typ(value)
-                except FHIRValidationError:
-                    raise
-                except:
-                    raise ValueError(
-                        "Unable to cast value for element of type '{}' for {}"
-                        .format(typ, self)
-                            )
+                return typ(value)
 
     # MARK: Handling References
 
