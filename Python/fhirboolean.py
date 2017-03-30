@@ -29,7 +29,7 @@ class FHIRBoolean(object):
                     self.value = jsonval == 'true'
                 else:
                     logging.warning(
-                        'Failed to initialize FHIRBoolean from "{}'
+                        'Failed to initialize FHIRBoolean from "{}"'
                             .format(jsonval)
                     )
 

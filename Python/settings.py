@@ -57,10 +57,10 @@ tpl_searchparams_target = '../models/fhirsearchelement.py'
 # unit tests
 tpl_unittest_source = 'Python/template-unittest.py'
 unittest_copyfiles = [
-    'Python/tests/__init__.py',
-    'Python/tests/test_fhir_abstract_base.py',
+    'Python/__init__.py',
+    'Python/tests/test_cast.py',
     'Python/tests/test_fhir_date.py',
-    'Python/tests/test_fhir_reference.py',
+    'Python/tests/test_fhir_boolean.py',
 ]
 unittest_format_path_prepare = '{}'             # used to format `path` before appending another path element - one placeholder for `path`
 unittest_format_path_key = '{}.{}'              # used to create property paths by appending `key` to the existing `path` - two placeholders

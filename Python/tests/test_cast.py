@@ -2,48 +2,11 @@
 
 from unittest import TestCase, main
 
-from Python.fhirabstractbase import FHIRAbstractBase
-from Python.fhirboolean import FHIRBoolean
-from Python.fhirdate import FHIRDate
-
-class CastToBoolTestCase(TestCase):
-    def setUp(self):
-        self.res = FHIRAbstractBase()
-
-    def test_from_str(self):
-        self.assertEqual(self.res._cast('0', FHIRBoolean).as_json(), None)
-        self.assertEqual(self.res._cast('1', FHIRBoolean).as_json(), None)
-        self.assertEqual(self.res._cast('2', FHIRBoolean).as_json(), None)
-        self.assertEqual(self.res._cast('false', FHIRBoolean).as_json(), False)
-        self.assertEqual(self.res._cast('Off', FHIRBoolean).as_json(), None)
-        self.assertEqual(self.res._cast('DISABLE', FHIRBoolean).as_json(), None)
-        self.assertEqual(self.res._cast('true', FHIRBoolean).as_json(), True)
-        self.assertEqual(self.res._cast('On', FHIRBoolean).as_json(), None)
-        self.assertEqual(self.res._cast('ENABLE', FHIRBoolean).as_json(), None)
-
-    def test_from_int(self):
-        self.assertEqual(self.res._cast(0, FHIRBoolean), None)
-        self.assertEqual(self.res._cast(1, FHIRBoolean), None)
-        self.assertEqual(self.res._cast(2, FHIRBoolean), None)
-        self.assertEqual(self.res._cast(-1, FHIRBoolean), None)
-
-    def test_from_list(self):
-        self.assertEqual(self.res._cast([], FHIRBoolean), None)
-        self.assertEqual(self.res._cast([1], FHIRBoolean), None)
-        self.assertEqual(self.res._cast([None], FHIRBoolean), None)
-
-    def test_from_float(self):
-        self.assertEqual(self.res._cast(0.0, FHIRBoolean), None)
-        self.assertEqual(self.res._cast(0.00001, FHIRBoolean), None)
-
-    def test_from_bool(self):
-        self.assertEqual(self.res._cast(True, FHIRBoolean).as_json(), True)
-        self.assertEqual(self.res._cast(False, FHIRBoolean).as_json(), False)
-
+from ..resource import Resource
 
 class CastToIntTestCase(TestCase):
     def setUp(self):
-        self.res = FHIRAbstractBase()
+        self.res = Resource()
 
     def test_from_str(self):
         self.assertEqual(self.res._cast('314', int), 314)
@@ -62,22 +25,38 @@ class CastToIntTestCase(TestCase):
 
 class CastToFloatTestCase(TestCase):
     def setUp(self):
-        self.res = FHIRAbstractBase()
+        self.res = Resource()
 
     def test_from_str(self):
-        self.assertEqual(self.res._cast('314', float), 314.0)
+        result = self.res._cast('314', float)
+        self.assertIsInstance(result, float)
+        self.assertEqual(result, 314.0)
+
+        result = self.res._cast('3.14e2', float)
+        self.assertIsInstance(result, float)
+        self.assertEqual(result, 314.0)
+
+        result = self.res._cast('-3.14e2', float)
+        self.assertIsInstance(result, float)
+        self.assertEqual(result, -314.0)
+
         self.assertEqual(self.res._cast('3.14', float), 3.14)
-        self.assertEqual(self.res._cast('3.14e2', float), 314.0)
-        self.assertEqual(self.res._cast('-3.14e2', float), -314.0)
         self.assertEqual(self.res._cast('3.14e-2', float), 0.0314)
         self.assertEqual(self.res._cast('string', float), None)
 
     def test_from_int(self):
-        self.assertEqual(self.res._cast(31415, float), 31415.0)
+        result = self.res._cast(31415, float)
+        self.assertIsInstance(result, float)
+        self.assertEqual(result, 31415.0)
 
     def test_from_bool(self):
-        self.assertEqual(self.res._cast(True, float), 1.0)
-        self.assertEqual(self.res._cast(False, float), 0.0)
+        result = self.res._cast(True, float)
+        self.assertIsInstance(result, float)
+        self.assertEqual(result, 1.0)
+
+        result = self.res._cast(False, float)
+        self.assertIsInstance(result, float)
+        self.assertEqual(result, 0.0)
 
     def test_from_float(self):
         self.assertEqual(self.res._cast(3.14, float), 3.14)
@@ -85,7 +64,7 @@ class CastToFloatTestCase(TestCase):
 
 class CastToStringTestCase(TestCase):
     def setUp(self):
-        self.res = FHIRAbstractBase()
+        self.res = Resource()
 
     def test_from_int(self):
         self.assertEqual(self.res._cast(0, str), '0')
@@ -110,7 +89,7 @@ class CastToStringTestCase(TestCase):
 
 class CastListOfStringsToListOfInTestCase(TestCase):
     def setUp(self):
-        self.res = FHIRAbstractBase()
+        self.res = Resource()
 
     def test_from_str(self):
         self.assertEqual(
@@ -131,16 +110,11 @@ class CastListOfStringsToListOfInTestCase(TestCase):
         self.assertEqual(self.res._cast(123, int, True), None)
 
 
-class CastDict(TestCase):
+class CastFromDict(TestCase):
     def setUp(self):
-        self.res = FHIRAbstractBase()
+        self.res = Resource()
 
     def test_from_dict(self):
-        self.assertEqual(self.res._cast({}, FHIRBoolean), {})
-        self.assertEqual(
-            self.res._cast({'key': 'value'}, FHIRDate),
-            {'key': 'value'}
-        )
         self.assertEqual(self.res._cast({1: '3.14'}, str), {1: '3.14'})
         self.assertEqual(
             self.res._cast({'list': [1, 2]}, int),

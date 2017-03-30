@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 from unittest import TestCase, main
-
 from datetime import date, datetime
 
-from Python.fhirdate import FHIRDate
+from ..resource import Resource
+from ..fhirdate import FHIRDate
 
 
 class CastDateTestCase(TestCase):
@@ -40,6 +40,17 @@ class CastDateTestCase(TestCase):
     def test_from_not_valid_str_date(self):
         el = FHIRDate('1986-21-21')
         self.assertEqual(el.as_json(), '1986-21-21')
+
+
+class CastFromDict(TestCase):
+    def setUp(self):
+        self.res = Resource()
+
+    def test_from_dict(self):
+        self.assertEqual(
+            self.res._cast({'key': 'value'}, FHIRDate),
+            {'key': 'value'}
+        )
 
 if __name__ == '__main__':
     main()
