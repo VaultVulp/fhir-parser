@@ -111,16 +111,58 @@ class CastListOfStringsToListOfInTestCase(TestCase):
 
 
 class CastFromDict(TestCase):
-    def setUp(self):
-        self.res = Resource()
-
     def test_from_dict(self):
-        self.assertEqual(self.res._cast({1: '3.14'}, str), {1: '3.14'})
+        res = Resource()
+        self.assertEqual(res._cast({1: '3.14'}, str), {1: '3.14'})
         self.assertEqual(
-            self.res._cast({'list': [1, 2]}, int),
+            res._cast({'list': [1, 2]}, int),
             {'list': [1, 2]}
         )
 
+
+class CastFromInstance(TestCase):
+    def test_from_instance(self):
+        res = Resource()
+        self.assertIsInstance(
+            res._cast(res, Resource),
+            Resource
+        )
+
+
+class TestExceptions(TestCase):
+    def test_wrong_resource_type(self):
+        with self.assertRaises(Exception) as err:
+            Resource({'id': 'some-id', 'resourceType': 'NotResource'})
+
+        self.assertEqual(
+            "Attempting to instantiate <class 'fhirmodels.resource.Resource'> "
+            "with resource data that defines a resourceType of \"NotResource\"",
+            str(err.exception)
+        )
+
+    def test_wrong_argument_type(self):
+        with self.assertRaises(Exception) as err:
+            Resource.with_json(123)
+
+        self.assertIn(
+            "`with_json()` on <class 'fhirmodels.resource.Resource'> only "
+            "takes dict or list of dict, but you provided <class 'int'>",
+            str(err.exception)
+        )
+
+    def test_tolerant(self):
+        with self.assertLogs() as logged:
+            res = Resource({'id': 'some-id', 'language': 123}, strict=False)
+
+        self.assertEqual(
+            res.as_json(),
+            {'id': 'some-id', 'resourceType': 'Resource'}
+        )
+        self.assertIn(
+            "Wrong type <class 'int'> for property \"language\" on <class "
+            "'fhirmodels.resource.Resource'>, expecting <class 'str'>",
+            ''.join(logged.output)
+        )
 
 if __name__ == '__main__':
     main()

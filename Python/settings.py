@@ -58,7 +58,7 @@ tpl_searchparams_target = '../models/fhirsearchelement.py'
 tpl_unittest_source = 'Python/template-unittest.py'
 unittest_copyfiles = [
     'Python/__init__.py',
-    'Python/tests/test_cast.py',
+    'Python/tests/test_resource.py',
     'Python/tests/test_fhir_date.py',
     'Python/tests/test_fhir_boolean.py',
 ]
