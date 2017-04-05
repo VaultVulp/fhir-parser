@@ -10,12 +10,14 @@ import isodate
 
 from datetime import date, datetime
 
+import re
 
 class FHIRDate(object):
     """ Facilitate working with dates.
 
     - `date`: datetime object representing the receiver's date-time
     """
+    timezone_regex = re.compile('.+(Z|[+-][0-9:]{0,5})$')
 
     def __init__(self, jsonval=None):
         self.date = None
@@ -70,12 +72,19 @@ class FHIRDate(object):
             else:
                 # Replace microseconds with milliseconds
                 formats = self.format.split('.%f')
-                result = isodate.datetime_isoformat(self.date, formats[0])
-                result += isodate.datetime_isoformat(self.date, '.%f')[:-3]
-                result += isodate.datetime_isoformat(self.date, formats[1])
-            if self._origval and self._origval.endswith('+00:00'):
-                # Restore original timezone presentation
-                result = result.replace('Z', '+00:00')
+                result = ''.join((
+                    isodate.datetime_isoformat(self.date, formats[0]),
+                    isodate.datetime_isoformat(self.date, '.%f')[:-3],
+                    isodate.datetime_isoformat(self.date, formats[1])
+                ))
+            if self._origval and isinstance(self.date, datetime):
+                # Restoring original timezone representation
+                result_tz = isodate.datetime_isoformat(self.date, '%Z')
+                match = self.timezone_regex.match(self._origval)
+                if result_tz and match:
+                    orig_tz = match.group(1)
+                    if orig_tz != result_tz:
+                        result = result[:-len(result_tz)] + orig_tz
             return result
         elif isinstance(self.date, datetime):
             return isodate.datetime_isoformat(self.date)
