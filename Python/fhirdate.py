@@ -114,11 +114,11 @@ class FHIRDate(object):
                 elif 'month' not in groups:
                     if 'week' in groups:
                         if 'day' in groups:
-                            return '%Y %W %d'
+                            return '%Y-W%W-%w'
                         else:
-                            return '%Y %W'
+                            return '%Y-W%W'
                     elif 'day' in groups:
-                        return '%Y %d'
+                        return '%Y-%j'
                     else:
                         return '%Y'
                 elif 'day' not in groups or groups['day'] is None:
@@ -140,7 +140,7 @@ class FHIRDate(object):
                     elif 'minute' in groups:
                         return '%H:%M%Z'
                     else:
-                        return '%H:%M%Z'
+                        return '%H%Z'
 
     def _datetime_format(self, datetime_string):
         if 'T' in datetime_string:
