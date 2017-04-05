@@ -59,8 +59,8 @@ tpl_unittest_source = 'Python/template-unittest.py'
 unittest_copyfiles = [
     'Python/__init__.py',
     'Python/tests/test_resource.py',
-    'Python/tests/test_fhir_date.py',
-    'Python/tests/test_fhir_boolean.py',
+    'Python/tests/test_fhirdate.py',
+    'Python/tests/test_fhirboolean.py',
 ]
 unittest_format_path_prepare = '{}'             # used to format `path` before appending another path element - one placeholder for `path`
 unittest_format_path_key = '{}.{}'              # used to create property paths by appending `key` to the existing `path` - two placeholders
