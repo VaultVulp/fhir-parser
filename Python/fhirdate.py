@@ -17,7 +17,7 @@ class FHIRDate(object):
 
     - `date`: datetime object representing the receiver's date-time
     """
-    timezone_regex = re.compile('.+(Z|[+-][0-9:]{0,5})$')
+    timezone_regex = re.compile('^(.+?)(\.\d+)?(Z|[+-][0-9:]{0,5})?$')
 
     def __init__(self, jsonval=None):
         self.date = None
@@ -66,25 +66,28 @@ class FHIRDate(object):
         if self.date is None:
             return None
 
-        if self.format is not None:
-            if '.%f' not in self.format:
-                result = isodate.datetime_isoformat(self.date, self.format)
-            else:
-                # Replace microseconds with milliseconds
-                formats = self.format.split('.%f')
-                result = ''.join((
-                    isodate.datetime_isoformat(self.date, formats[0]),
-                    isodate.datetime_isoformat(self.date, '.%f')[:-3],
-                    isodate.datetime_isoformat(self.date, formats[1])
-                ))
-            if self._origval and isinstance(self.date, datetime):
-                # Restoring original timezone representation
-                result_tz = isodate.datetime_isoformat(self.date, '%Z')
-                match = self.timezone_regex.match(self._origval)
-                if result_tz and match:
-                    orig_tz = match.group(1)
-                    if orig_tz != result_tz:
-                        result = result[:-len(result_tz)] + orig_tz
+        if self.format:
+            result = isodate.datetime_isoformat(self.date, self.format)
+            if isinstance(self.date, datetime) and self._origval:
+                orig_match = self.timezone_regex.match(self._origval)
+                if orig_match:
+                    result_match = self.timezone_regex.match(result)
+                    result_ms = result_tz = ''
+                    # Restoring original representation of parts of seconds
+                    if orig_match.group(2):
+                        result_ms = isodate.datetime_isoformat(self.date, '.%f')
+                        orig_ms = orig_match.group(2)
+                        if result_ms != orig_ms:
+                            result_ms = result_ms[:len(orig_ms)]
+
+                    # Restoring original timezone representation
+                    if orig_match.group(3):
+                        result_tz = isodate.datetime_isoformat(self.date, '%Z')
+                        orig_tz = orig_match.group(3)
+                        if result_tz != orig_tz:
+                            result_tz = orig_tz
+
+                    result = result_match.group(1) + result_ms + result_tz
             return result
         elif isinstance(self.date, datetime):
             return isodate.datetime_isoformat(self.date)

@@ -26,6 +26,13 @@ class TestFHIRDateAsJson(TestCase):
             datetime(2015, 2, 9, 11, 4, 15, 817000,  tzinfo=FixedOffset(-5))
         )
 
+        el = FHIRDate('2015-02-09T11:04:15.817921-05:00')
+        self.assertEqual(el.as_json(), '2015-02-09T11:04:15.817921-05:00')
+        self.assertEqual(
+            el.date,
+            datetime(2015, 2, 9, 11, 4, 15, 817921,  tzinfo=FixedOffset(-5))
+        )
+
         el = FHIRDate('2013-01-01T10:50:00+00:00')
         self.assertEqual(el.as_json(), '2013-01-01T10:50:00+00:00')
         self.assertEqual(
